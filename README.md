@@ -1,66 +1,102 @@
-# Phase 2 Project
+# House Price Linear Regression
 
-Another module down--you're almost half way there!
+**Authors**: Ricky Wong
 
-![awesome](https://raw.githubusercontent.com/learn-co-curriculum/dsc-phase-2-project-campus/master/halfway-there.gif)
+## Overview
 
-All that remains in Phase 2 is to put our newfound data science skills to use with a large project! This project should take 20 to 30 hours to complete.
+Jim's Real Estate wants to help homeowners make the most of their property and would like to know how renovations affect house prices. Using linear regression we found two variables that affected house prices the most. Using that information, real estate agents can provide meaningful advice for homeowners.
 
-## Project Overview
+## Business Understanding
 
-For this project, you will use regression modeling to analyze house sales in a northwestern county.
+There are a variety of variables when determining the value of a property. Creating a model for real estate agents will help them advise homewoeners about how renovating affects the value of their property. To do this we will explore house data from King County to build a basic model then reiterate the process to improve on the model.  
 
-### The Data
+## Data Understanding
 
-This project uses the King County House Sales dataset, which can be found in  `kc_house_data.csv` in the data folder in this repo. The description of the column names can be found in `column_names.md` in the same folder. As with most real world data sets, the column names are not perfectly described, so you'll have to do some research or use your best judgment if you have questions about what the data means.
+We have obtained house data from King County to help us build the model. This includes useful information like the price of the property, the living area in square feet and the year the poroprty was renovated to name a few.<br />
+After getting an idea of the data we are dealing with we can see most of our data are numerical with some columns missing data like 'waterfront' and 'yr_renovated'. We will need to clean those up later<br />
+There are some data which is not really relevant to our model which we can remove.<br /> 
+Taking a closer look we can observe a few points
+- A possible outlier with 33 bedrooms when the mean is only 3.
+- Condition of the house is form 1-5
+- There is a grading system from 3 - 13
+- And house data from 1900 - 2015
+- sqft_basement has '?' which could explain why it is an object instead of being numeric
 
-It is up to you to decide what data from this dataset to use and how to use it. If you are feeling overwhelmed or behind, we recommend you ignore some or all of the following features:
+#### Continuous Data
+The histograms show the data being positively skewed. We will need to run log transformations to make them more normal.
 
-* date
-* view
-* sqft_above
-* sqft_basement
-* yr_renovated
-* zipcode
-* lat
-* long
-* sqft_living15
-* sqft_lot15
+#### Categorical Data
+The house with 33 bedrooms is an outlier which we can drop when cleaning <br />
+We can see there wasn't many renovations happening (less than 10) until after 1982 <br />
+Knowing if the property has been renovated or not would be more useful than the year the property was renovated 
 
-### Business Problem
 
-It is up to you to define a stakeholder and business problem appropriate to this dataset.
+## Data Preparation
 
-If you are struggling to define a stakeholder, we recommend you complete a project for a real estate agency that helps homeowners buy and/or sell homes. A business problem you could focus on for this stakeholder is the need to provide advice to homeowners about how home renovations might increase the estimated value of their homes, and by what amount.
+We remove rows with null values in 'yr_renovated' as we don't know if they have been renovated or not. <br />
+We will also remove basement values that are not numbers. We still have plenty of data to use from removing them. <br />
+Remove the outlier in bedrooms
 
-## Deliverables
+#### Check for Multicollinearity
+Variables that are highly correlated to another variable will cause problems for our regression analysis. Making the results unreliable. To fix that we look for highly correlated variables and remove some. <br />
+We removed 'sqft_basement' and 'bathrooms'
 
-There are three deliverables for this project:
+#### Normalise
+Our data is positively skewed so we need to do log transformation to make it have a more normal distribution.
+After that we need to standardise our data making the mean 0
 
-* A **GitHub repository**
-* A **Jupyter Notebook**
-* A **non-technical presentation**
+#### One Hot Encode
+For linear regression, categorical data should be transformed using one-hot encoding.
+In order to not have so many predictors for the year built we categorised them into 5 year increments.
 
-Review the "Project Submission & Review" page in the "Milestones Instructions" topic for instructions on creating and submitting your deliverables. Refer to the rubric associated with this assignment for specifications describing high-quality deliverables.
+## Modeling
 
-### Key Points
+#### Model 1
+Our first model used all the available predictors and got an R-Squared value of 0.633 which is reasonable, being able to explain 63% of variations of our model. <br />
+std_above and conditions had p-values greater than 0.05 so we will remove those for the next model.
 
-* **Your deliverables should explicitly address each step of the data science process.** Refer to [the Data Science Process lesson](https://github.com/learn-co-curriculum/dsc-data-science-processes) from Topic 19 for more information about process models you can use.
+#### Model 2
+Removing the two predictors have lowered our R-Squared score slightly <br />
+Skew and Kurtosis is still quite high <br />
+Doing a QQ-plot shows it is not normal so we run log transformation on price as well.
 
-* **Your Jupyter Notebook should demonstrate an iterative approach to modeling.** This means that you begin with a basic model, evaluate it, and then provide justification for and proceed to a new model. After you finish refining your models, you should provide 1-3 paragraphs discussing your final model - this should include interpreting at least 3 important parameter estimates or statistics.
+#### Model 3
+After log transformation on price we can see if has improved the distribution to be more normal<br />
+Improved Skewness from highly positive skew to slightly negative skew. Improved skew which is now between -0.5 and 0.5  meaning the data is pretty symmetrical as shown in the QQ-plot below <br />
+R-Squared value has also increased to 0.646 meaning 64.6% of the variance is explained by the model.<br />
+![QQ-Plot](images/QQ-Plot.JPG)
 
-* **Based on the results of your models, your notebook and presentation should discuss at least two features that have strong relationships with housing prices.**
+#### Homoscedasticity
+Scatterplot to show homoscedasticity. No cone like pattern.
+![Residual Scatterplot](images/Residuals Scatterplot.JPG)
 
-## Getting Started
+#### Training
+With training and test MSE being similar, we can expect the model to perform similarly on different data.<br />
+Accuracy of the model is 63.42
+![Accuracy](images/Accuracy.JPG)
 
-Start on this project by forking and cloning [this project repository](https://github.com/learn-co-curriculum/dsc-phase-2-project) to get a local copy of the dataset.
 
-We recommend structuring your project repository similar to the structure in [the Phase 1 Project Template](https://github.com/learn-co-curriculum/dsc-project-template). You can do this either by creating a new fork of that repository to work in or by building a new repository from scratch that mimics that structure.
+## Conclusions
+With our final model the OLS regression results tell us that the R-Squared value is 0.646 meaning 64.6% of the variance can be explained by the model. The results also tells us the skewness is -0.039 which is between -0.5 to 0.5 meaning the data is symmetrical, satisfying the normality assumption. This can also be seen from the QQ-plot with points mostly following the line. If we observed a QQ-plot like in model 2 then the distribution would be non-normal. Another assumption for linear regression is that data must be homoscedastic. To check this we created a scatterplot and did not observe any cone like shapes which would indicated the data is heteroscedastic.<br />
+The living space of a property has the strongest relationship with house prices. This is determined by the t value of 49.874 which tells us how statistically significant the coefficient is. This makes sense as we spend most of the time inside the house and having a larger living area generally means more rooms or floors making it appealing to buyers. Floor had the next highest t value of 11.1 but only for 3 floors. Having more floors generally means more living area which can increase the value. Grades are also significant as it represents the quality of the home. Renovated has a t value of 2.7 which is not as high. This might be because the data for unrenovated homes heavily outweighed that of renovated homes. 
 
-## Project Submission and Review
 
-Review the "Project Submission & Review" page in the "Milestones Instructions" topic to learn how to submit your project and how it will be reviewed. Your project must pass review for you to progress to the next Phase.
 
-## Summary
+## For More Information
 
-This project will give you a valuable opportunity to develop your data science skills using real-world data. The end-of-phase projects are a critical part of the program because they give you a chance to bring together all the skills you've learned, apply them to realistic projects for a business stakeholder, practice communication skills, and get feedback to help you improve. You've got this!
+Please review our full analysis in [our Jupyter Notebook](House Price.ipynb) or our [presentation](./presentation.pdf).
+
+For any additional questions, please contact ** Ricky wong_ricky@hotmail.com**
+
+## Repository Structure
+
+
+```
+├── README.md                           <- The top-level README for reviewers of this project
+├── House Price.ipynb                   <- Narrative documentation of analysis in Jupyter notebook
+├── notebook.pdf                        <- PDF version of notebook
+├── presentation.pdf                    <- PDF version of project presentation
+├── github.pdf                          <- PDF version of github  
+├── data                                <- Both sourced externally and generated from code
+└── images                              <- Both sourced externally and generated from code
+```
