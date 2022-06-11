@@ -84,7 +84,7 @@ The living space of a property has the strongest relationship with house prices.
 
 ## For More Information
 
-Please review our full analysis in [our Jupyter Notebook](House Price.ipynb) or our [presentation](./presentation.pdf).
+Please review our full analysis in [our Jupyter Notebook](./House Price.ipynb) or our [presentation](./presentation.pdf).
 
 For any additional questions, please contact ** Ricky wong_ricky@hotmail.com**
 
